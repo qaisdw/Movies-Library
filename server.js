@@ -5,10 +5,10 @@ const axios = require("axios");
 require('dotenv').config()
 const bodyParser = require('body-parser')
 const app = express()
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
 const port = process.env.port;
 //node-postgres
 let url = process.env.url;
@@ -17,29 +17,33 @@ const client = new Client(url)
 
 
 // routes 
-app.post("/",sqlMovies);
+app.get("/",SayHi);
+app.post("/moviesSql",sqlMovies);
 app.get("/getMovies",moviesData)
 
 
 //functions
-function sqlMovies(err,req,res){
-    //console.log(req.body);
+function SayHi(req,res){
+console.log("response resived")
+}
+
+function sqlMovies(req,res){
+    //console.log("hi");
     let sql = `INSERT INTO movies (movieName, overView)
-    VALUES ($1,$2); `
+    VALUES ($1,$2)  RETURNING *; `
     let {movieName,overView}= req.body;
     let values = [movieName,overView];
     client.query(sql,values).then(
         res.status(201).send("Data recived to the server")   
-    ).catch(errorHandeler(err));
+    ).catch();
 }
 
-function moviesData(err,req,res){
+function moviesData(req,res){
     let sql = `SELECT * FROM movies; `
     client.query(sql).then((result)=>{
-        console.log(result);
         res.json(result.rows);
     }
-    ).catch(errorHandeler(err));
+    ).catch();
 }
 
 
