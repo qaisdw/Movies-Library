@@ -1,15 +1,19 @@
-# Project Name - Movies-Library
+
+# Project Name - Movie Dictionary
 
 **Author Name**: Qais Dwairi
 
 ## WRRC
-![web request-response cycle](./Movie%20Data/web%20request-response%20cycle.png)
+![Movie WRRC](./Movie%20Data/web%20request-response%20cycle.png)
 
 ## Overview
-search for a movie in a json file.
+gettinng data from Movie API to through the server and send it to the client.
 
 ## Getting Started
-send requset through thunder client to the server using any route name. 
+<!-- What are the steps that a user must take in order to build this app on their own machine and get it running? -->
+type the name of the route in thunder client to send request to the server.
 
 ## Project Features
-search for a movie in json file.
+<!-- What are the features included in you app -->
+getting data from The Movie DataBase API.
+

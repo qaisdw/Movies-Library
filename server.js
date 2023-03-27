@@ -1,41 +1,90 @@
 "use strict";
 
 const express = require('express');
-const jasonData = require('./Movie Data/data.json');
-const app = express();
-const port = 3000;
+const axios = require("axios");
+require('dotenv').config()
+const app = express()
+const port = process.env.port;
+const Api_Key=process.env.api_key;
 
-app.get("/",firstfunction);
-app.get("/favorite",welcomingFun);
+app.get("/movie",movieFun);
+app.get("/search",movieSearch)
+app.get("/language",movieLanguage)
+app.get("/movieType",movieType)
 
-function firstfunction(req,res){
-  let result1 =[];
-    
-  let newJsonData=new JasonCon(jasonData.title,jasonData.poster_path,jasonData.overview)
-  result1.push(newJsonData);
-
-  res.json(result1);
+function movieFun(req,res){
+    let url = `https://api.themoviedb.org/3/trending/all/week?api_key=${Api_Key}&language=en-US`;
+    axios.get(url)
+    .then((result)=>{
+        console.log(result.data);
+        let dataMovie = result.data.results.map((movie)=>{
+            return new ConMovie(movie.id,movie.title,movie.release_date,movie.poster_path,movie.overview)
+        })
+        res.json(dataMovie);
+    })
+    .catch((err)=>{
+        errorHandeler(err);
+    })
 }
 
-function welcomingFun(req,res){
-  res.send("welcome to favorite page");
+function movieSearch(req,res){
+    let movieName = req.query.name;
+    let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&language=en-US&query=${movieName}&The&page=2`
+    axios.get(url)
+    .then((result)=>{
+        res.json(result.data.results);
+    })
+    .catch((err)=>{
+        errorHandeler(err);
+    })
+
 }
 
-function JasonCon(title,poster_path,overview){
-  this.title=title;
-  this.poster_path=poster_path;
-  this.overview=overview;
+function movieLanguage(req,res){
+  let movieLang = req.query.original_language;
+  let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&language=en-US&query=${movieLang}&The&page=2`
+  axios.get(url)
+  .then((result)=>{
+      res.json(result.data.results);
+  })
+  .catch((err)=>{
+      errorHandeler(err);
+  })
+
 }
 
+function movieType(req,res){
+  let movietype = req.query.media_type;
+  let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&language=en-US&query=${movietype}&The&page=2`
+  axios.get(url)
+  .then((result)=>{
+      res.json(result.data.results);
+  })
+  .catch((err)=>{
+      errorHandeler(err);
+  })
+
+}
+
+// error handeler 
 app.use((req,res)=>{
   res.status(404).send("sorry, somthing went wrong !");
 })
 
-app.use((err,req,res)=>{
-  res.status(500).send("somthing broke!");
-})
+app.use(errorHandeler);
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+function errorHandeler(err,req,res){
+  res.status(500).send(err);
+}
 
+function ConMovie(id,title,release_date,poster_path,overview){
+    this.id=id;
+    this.title=title;
+    this.release_date=release_date;
+    this.poster_path=poster_path;
+    this.overview=overview;
+}
+
+app.listen(port,()=>{
+    console.log(`Example app listening on port ${port}`);
+})
