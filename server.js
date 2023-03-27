@@ -27,7 +27,7 @@ function SayHi(req,res){
 console.log("response resived")
 }
 
-function sqlMovies(req,res){
+function sqlMovies(req,res,err){
     //console.log("hi");
     let sql = `INSERT INTO movies (movieName, overView)
     VALUES ($1,$2)  RETURNING *; `
@@ -35,15 +35,15 @@ function sqlMovies(req,res){
     let values = [movieName,overView];
     client.query(sql,values).then(
         res.status(201).send("Data recived to the server")   
-    ).catch();
+    ).catch(errorHandeler(err));
 }
 
-function moviesData(req,res){
+function moviesData(req,res,err){
     let sql = `SELECT * FROM movies; `
     client.query(sql).then((result)=>{
         res.json(result.rows);
     }
-    ).catch();
+    ).catch(errorHandeler(err));
 }
 
 
