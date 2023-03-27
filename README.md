@@ -1,3 +1,4 @@
+
 # Project Name - Movie Dictionary
 
 **Author Name**: Qais Dwairi
@@ -15,3 +16,4 @@ type the name of the route in thunder client to send request to the server.
 ## Project Features
 <!-- What are the features included in you app -->
 getting data from The Movie DataBase API.
+
