@@ -51,9 +51,9 @@ function moviesData(req,res,err){
 app.use((req,res)=>{
     res.status(404).send("sorry, somthing went wrong !");
 })
-  
+
 app.use(errorHandeler);
-  
+
 function errorHandeler(err,req,res){
     res.status(500).send(err);
 }
