@@ -31,7 +31,7 @@ function SayHi(req,res){
 console.log("response resived")
 }
 
-function sqlMovies(req,res,err){
+function sqlMovies(req,res){
     //console.log("hi");
     let {movieName,overView}= req.body;
     let values = [movieName,overView];
@@ -39,51 +39,51 @@ function sqlMovies(req,res,err){
     VALUES ($1,$2) RETURNING *; `
     client.query(sql,values).then(
         res.status(201).send("Data recived to the server")   
-    ).catch(errorHandeler(err));
+    ).catch((err)=>{errorHandeler(err)});
 }
 
-function moviesData(req,res,err){
+function moviesData(req,res){
     let sql = `SELECT * FROM movies; `
     client.query(sql).then((result)=>{
         res.json(result.rows);
     }
-    ).catch(errorHandeler(err));
+    ).catch((err)=>{errorHandeler(err)});
 }
 
-function updateHandler(req,res,err){
+function updateHandler(req,res){
     let ID = req.params.id;
     let {movieName,overView}=req.body
     let values = [movieName,overView,ID];
-    let sql = `UPDATE movies SET movieName = 1$, overView = 2$ WHERE ID = 3$ ; `;
+    let sql = `UPDATE movies SET movieName = $1, overView = $2 WHERE ID = $3 ; `;
     client.query(sql,values).then((result)=>{
         res.json("DONE");
     }
-    ).catch(errorHandeler(err));
+    ).catch((err)=>{errorHandeler(err)});
 
 }
 
-function movieDeleted(req,res,err){
+function movieDeleted(req,res){
     let ID=req.params.id;
-    let sql = `DELETE FROM movies WHERE ID= 1$; `;
+    let sql = `DELETE FROM movies WHERE ID= $1; `;
     let values = [ID];
     client.query(sql,values).then((result)=>{
         res.status(204).send("DONE");
     }
-    ).catch(errorHandeler(err));
+    ).catch((err)=>{errorHandeler(err)});
 
 }
 
-function getData(req,res,err){
+function getData(req,res){
     let ID = req.params.id;
     let values = [ID];
-    let sql = `SELECT * FROM movies WHERE ID = 1$; `;
+    let sql = `SELECT * FROM movies WHERE ID = $1; `;
     client.query(sql,values).then((result)=>{
         if(result.rows.length===0){
             res.send("this movie dose not exist");
         }else{
             res.json(result.rows);
         }
-    }).catch(errorHandeler(err));
+    }).catch((err)=>{errorHandeler(err)});
 
 }
 
