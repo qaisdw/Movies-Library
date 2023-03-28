@@ -1,5 +1,7 @@
-CREATE TABLE movies (
-    ID = FLOOR(RAND()*(100-0+1))+0,
+-- to conect the table to the database use psql -d nameofdatabase -f nameofsqlfile (schema.sql)
+DROP TABLE IF EXISTS movies;
+CREATE TABLE IF NOT EXISTS movies (
+    ID SERIAL PRIMARY KEY,
     movieName VARCHAR(255),
-    overView VARCHAR(255)
+    overView VARCHAR(500)
 ); 

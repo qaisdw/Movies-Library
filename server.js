@@ -1,5 +1,6 @@
 "use strict";
 
+// to kill a port => sudo kill -9 $(sudo lsof -t -i:portnumber)
 const express = require('express');
 require('dotenv').config()
 const bodyParser = require('body-parser')
@@ -19,8 +20,10 @@ const client = new Client(url)
 app.get("/",SayHi);
 app.post("/moviesSql",sqlMovies);
 app.get("/getMovies",moviesData);
-app.put("/updateMpvies/id",updateHandler);
-app.delete("/deleteMovies/id",movieDeleted)
+app.put("/updateMpvies/:id",updateHandler);
+app.delete("/deleteMovies/:id",movieDeleted);
+app.get("/getMovies/:id",getData);
+
 
 
 //functions
@@ -30,10 +33,10 @@ console.log("response resived")
 
 function sqlMovies(req,res,err){
     //console.log("hi");
-    let sql = `INSERT INTO movies (movieName, overView)
-    VALUES ($1,$2)  RETURNING *; `
     let {movieName,overView}= req.body;
     let values = [movieName,overView];
+    let sql = `INSERT INTO movies (movieName, overView)
+    VALUES ($1,$2) RETURNING *; `
     client.query(sql,values).then(
         res.status(201).send("Data recived to the server")   
     ).catch(errorHandeler(err));
@@ -48,11 +51,10 @@ function moviesData(req,res,err){
 }
 
 function updateHandler(req,res,err){
-    let movieID = req.params.id;
-    let {ID,movieName,overView}= req.body;
-    let sql = `UPDATE movies
-    SET ID = $1 movieName = $2, overView = $3 ; `;
-    let values = [ID,movieName,overView];
+    let ID = req.params.id;
+    let {movieName,overView}=req.body
+    let values = [movieName,overView,ID];
+    let sql = `UPDATE movies SET movieName = 1$, overView = 2$ WHERE ID = 3$ ; `;
     client.query(sql,values).then((result)=>{
         res.json("DONE");
     }
@@ -61,13 +63,27 @@ function updateHandler(req,res,err){
 }
 
 function movieDeleted(req,res,err){
-    let {ID}=req.params;
-    let sql = `DELETE FROM movies WHERE id= 3$; `;
+    let ID=req.params.id;
+    let sql = `DELETE FROM movies WHERE ID= 1$; `;
     let values = [ID];
     client.query(sql,values).then((result)=>{
         res.status(204).send("DONE");
     }
     ).catch(errorHandeler(err));
+
+}
+
+function getData(req,res,err){
+    let ID = req.params.id;
+    let values = [ID];
+    let sql = `SELECT * FROM movies WHERE ID = 1$; `;
+    client.query(sql,values).then((result)=>{
+        if(result.rows.length===0){
+            res.send("this movie dose not exist");
+        }else{
+            res.json(result.rows);
+        }
+    }).catch(errorHandeler(err));
 
 }
 
@@ -79,7 +95,7 @@ app.use((req,res)=>{
 
 app.use(errorHandeler);
 
-function errorHandeler(err,req,res){
+function errorHandeler(req,res,err){
     res.status(500).send(err);
 }
 
