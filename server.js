@@ -39,7 +39,7 @@ function sqlMovies(req,res){
     VALUES ($1,$2) RETURNING *; `
     client.query(sql,values).then(
         res.status(201).send("Data recived to the server")   
-    ).catch();
+    ).catch((err)=>{errorHandeler(err)});
 }
 
 function moviesData(req,res){
@@ -47,7 +47,7 @@ function moviesData(req,res){
     client.query(sql).then((result)=>{
         res.json(result.rows);
     }
-    ).catch();
+    ).catch((err)=>{errorHandeler(err)});
 }
 
 function updateHandler(req,res){
@@ -58,7 +58,7 @@ function updateHandler(req,res){
     client.query(sql,values).then((result)=>{
         res.json("DONE");
     }
-    ).catch();
+    ).catch((err)=>{errorHandeler(err)});
 
 }
 
@@ -69,7 +69,7 @@ function movieDeleted(req,res){
     client.query(sql,values).then((result)=>{
         res.status(204).send("DONE");
     }
-    ).catch();
+    ).catch((err)=>{errorHandeler(err)});
 
 }
 
@@ -83,7 +83,7 @@ function getData(req,res){
         }else{
             res.json(result.rows);
         }
-    }).catch();
+    }).catch((err)=>{errorHandeler(err)});
 
 }
 
