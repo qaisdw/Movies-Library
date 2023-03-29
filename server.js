@@ -1,7 +1,7 @@
 "use strict";
 
+// to kill a port => sudo kill -9 $(sudo lsof -t -i:portnumber)
 const express = require('express');
-const axios = require("axios");
 require('dotenv').config()
 const bodyParser = require('body-parser')
 const app = express()
@@ -19,7 +19,11 @@ const client = new Client(url)
 // routes 
 app.get("/",SayHi);
 app.post("/moviesSql",sqlMovies);
-app.get("/getMovies",moviesData)
+app.get("/getMovies",moviesData);
+app.put("/updateMpvies/:id",updateHandler);
+app.delete("/deleteMovies/:id",movieDeleted);
+app.get("/getMovies/:id",getData);
+
 
 
 //functions
@@ -27,23 +31,60 @@ function SayHi(req,res){
 console.log("response resived")
 }
 
-function sqlMovies(req,res,err){
+function sqlMovies(req,res){
     //console.log("hi");
-    let sql = `INSERT INTO movies (movieName, overView)
-    VALUES ($1,$2)  RETURNING *; `
     let {movieName,overView}= req.body;
     let values = [movieName,overView];
+    let sql = `INSERT INTO movies (movieName, overView)
+    VALUES ($1,$2) RETURNING *; `
     client.query(sql,values).then(
         res.status(201).send("Data recived to the server")   
-    ).catch(errorHandeler(err));
+    ).catch((err)=>{errorHandeler(err)});
 }
 
-function moviesData(req,res,err){
+function moviesData(req,res){
     let sql = `SELECT * FROM movies; `
     client.query(sql).then((result)=>{
         res.json(result.rows);
     }
-    ).catch(errorHandeler(err));
+    ).catch((err)=>{errorHandeler(err)});
+}
+
+function updateHandler(req,res){
+    let ID = req.params.id;
+    let {movieName,overView}=req.body
+    let values = [movieName,overView,ID];
+    let sql = `UPDATE movies SET movieName = $1, overView = $2 WHERE ID = $3 ; `;
+    client.query(sql,values).then((result)=>{
+        res.json("DONE");
+    }
+    ).catch((err)=>{errorHandeler(err)});
+
+}
+
+function movieDeleted(req,res){
+    let ID=req.params.id;
+    let sql = `DELETE FROM movies WHERE ID= $1; `;
+    let values = [ID];
+    client.query(sql,values).then((result)=>{
+        res.status(204).send("DONE");
+    }
+    ).catch((err)=>{errorHandeler(err)});
+
+}
+
+function getData(req,res){
+    let ID = req.params.id;
+    let values = [ID];
+    let sql = `SELECT * FROM movies WHERE ID = $1; `;
+    client.query(sql,values).then((result)=>{
+        if(result.rows.length===0){
+            res.send("this movie dose not exist");
+        }else{
+            res.json(result.rows);
+        }
+    }).catch((err)=>{errorHandeler(err)});
+
 }
 
 
@@ -54,7 +95,7 @@ app.use((req,res)=>{
 
 app.use(errorHandeler);
 
-function errorHandeler(err,req,res){
+function errorHandeler(req,res,err){
     res.status(500).send(err);
 }
 
