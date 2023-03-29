@@ -3,10 +3,13 @@
 // to kill a port => sudo kill -9 $(sudo lsof -t -i:portnumber)
 const express = require('express');
 require('dotenv').config()
+const axios = require("axios");
 const bodyParser = require('body-parser')
 const app = express()
+const Api_Key=process.env.api_key;
 // parse application/json
 app.use(bodyParser.json())
+const jasonData = require('./Movie Data/data.json');
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
 const port = process.env.port;
@@ -17,7 +20,12 @@ const client = new Client(url)
 
 
 // routes 
-app.get("/",SayHi);
+app.get("/",firstfunction);
+app.get("/favorite",welcomingFun);
+app.get("/movie",movieFun);
+app.get("/search",movieSearch)
+app.get("/language",movieLanguage)
+app.get("/movieType",movieType)
 app.post("/moviesSql",sqlMovies);
 app.get("/getMovies",moviesData);
 app.put("/updateMpvies/:id",updateHandler);
@@ -27,9 +35,72 @@ app.get("/getMovies/:id",getData);
 
 
 //functions
-function SayHi(req,res){
-console.log("response resived")
+function firstfunction(req,res){
+    let result1 =[];
+      
+    let newJsonData=new JasonCon(jasonData.title,jasonData.poster_path,jasonData.overview)
+    result1.push(newJsonData);
+    res.json(result1);
+  }
+  function welcomingFun(req,res){
+    res.send("welcome to favorite page");
+  }
+  
+function movieFun(req,res){
+    let url = `https://api.themoviedb.org/3/trending/all/week?api_key=${Api_Key}&language=en-US`;
+    axios.get(url)
+    .then((result)=>{
+    //console.log(result.data);
+    let dataMovie = result.data.results.map((movie)=>{
+            return new ConMovie(movie.id,movie.title,movie.release_date,movie.poster_path,movie.overview)
+        })
+            res.json(dataMovie);
+        })
+    .catch((err)=>{
+        errorHandeler(err);
+    })
 }
+
+function movieSearch(req,res){
+    let movieName = req.query.name;
+    let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&language=en-US&query=${movieName}&The&page=2`
+    axios.get(url)
+    .then((result)=>{
+        res.json(result.data.results);
+    })
+    .catch((err)=>{
+        errorHandeler(err);
+    })
+    
+}
+
+function movieLanguage(req,res){
+    let movieLang = req.query.original_language;
+    let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&language=en-US&query=${movieLang}&The&page=2`
+    axios.get(url)
+    .then((result)=>{
+        res.json(result.data.results);
+    })
+  .catch((err)=>{
+      errorHandeler(err);
+    })
+    
+}
+
+function movieType(req,res){
+    let movietype = req.query.media_type;
+    let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&language=en-US&query=${movietype}&The&page=2`
+    axios.get(url)
+    .then((result)=>{
+        res.json(result.data.results);
+    })
+    .catch((err)=>{
+      errorHandeler(err);
+    })
+    
+}
+
+
 
 function sqlMovies(req,res){
     //console.log("hi");
@@ -39,9 +110,9 @@ function sqlMovies(req,res){
     VALUES ($1,$2) RETURNING *; `
     client.query(sql,values).then(
         res.status(201).send("Data recived to the server")   
-    ).catch((err)=>{errorHandeler(err)});
-}
-
+        ).catch((err)=>{errorHandeler(err)});
+    }
+    
 function moviesData(req,res){
     let sql = `SELECT * FROM movies; `
     client.query(sql).then((result)=>{
@@ -49,7 +120,7 @@ function moviesData(req,res){
     }
     ).catch((err)=>{errorHandeler(err)});
 }
-
+    
 function updateHandler(req,res){
     let ID = req.params.id;
     let {movieName,overView}=req.body
@@ -59,7 +130,7 @@ function updateHandler(req,res){
         res.json("DONE");
     }
     ).catch((err)=>{errorHandeler(err)});
-
+    
 }
 
 function movieDeleted(req,res){
@@ -70,7 +141,7 @@ function movieDeleted(req,res){
         res.status(204).send("DONE");
     }
     ).catch((err)=>{errorHandeler(err)});
-
+    
 }
 
 function getData(req,res){
@@ -84,10 +155,22 @@ function getData(req,res){
             res.json(result.rows);
         }
     }).catch((err)=>{errorHandeler(err)});
-
+    
 }
 
+function ConMovie(id,title,release_date,poster_path,overview){
+    this.id=id;
+    this.title=title;
+    this.release_date=release_date;
+    this.poster_path=poster_path;
+    this.overview=overview;
+}
 
+function JasonCon(title,poster_path,overview){
+  this.title=title;
+  this.poster_path=poster_path;
+  this.overview=overview;
+}
 // error handeler 
 app.use((req,res)=>{
     res.status(404).send("sorry, somthing went wrong !");
