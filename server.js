@@ -76,7 +76,7 @@ function movieSearch(req,res){
 
 function movieLanguage(req,res){
     let movieLang = req.query.original_language;
-    let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&language=en-US&query=${movieLang}&The&page=2`
+    let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&query=${movieLang}&The&page=2`
     axios.get(url)
     .then((result)=>{
         res.json(result.data.results);
@@ -88,8 +88,8 @@ function movieLanguage(req,res){
 }
 
 function movieType(req,res){
-    let movietype = req.query.media_type;
-    let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&language=en-US&query=${movietype}&The&page=2`
+    let movieReleaseDate = req.query.release_date;
+    let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&query=${movieReleaseDate}&The&page=2`
     axios.get(url)
     .then((result)=>{
         res.json(result.data.results);
@@ -123,9 +123,9 @@ function moviesData(req,res){
     
 function updateHandler(req,res){
     let ID = req.params.id;
-    let {movieName,overView}=req.body
-    let values = [movieName,overView,ID];
-    let sql = `UPDATE movies SET movieName = $1, overView = $2 WHERE ID = $3 ; `;
+    let {overView}=req.body
+    let values = [overView,ID];
+    let sql = `UPDATE movies SET overView = $1 WHERE ID = $2 ; `;
     client.query(sql,values).then((result)=>{
         res.json("DONE");
     }
