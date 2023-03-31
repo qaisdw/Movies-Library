@@ -20,14 +20,18 @@ const client = new Client(url)
 
 
 // routes 
+// lab-11
 app.get("/",firstfunction);
 app.get("/favorite",welcomingFun);
-app.get("/movie",movieFun);
+// lab-12
+app.get("/trending",movieFun);
 app.get("/search",movieSearch)
-app.get("/language",movieLanguage)
-app.get("/movieType",movieType)
+app.get("/TV-Popularity",tvPopularity)
+app.get("/MovieLanguage",movieLanguage)
+// Lab-13
 app.post("/moviesSql",sqlMovies);
 app.get("/getMovies",moviesData);
+// lab-14
 app.put("/updateMpvies/:id",updateHandler);
 app.delete("/deleteMovies/:id",movieDeleted);
 app.get("/getMovies/:id",getData);
@@ -62,12 +66,31 @@ function movieFun(req,res){
 }
 
 function movieSearch(req,res){
-    let movieName = req.query.name;
-    let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&language=en-US&query=${movieName}&The&page=2`
+    let movieName = req.query.title;
+    let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&query=${movieName}&page=2`
     axios.get(url)
     .then((result)=>{
-        res.json(result.data.results);
+        let dataMovie = result.data.results.map((movie)=>{
+            return new JasonCon(movie.title,movie.poster_path,movie.overview)
+        })
+            res.json(dataMovie);
+        })
+    .catch((err)=>{
+        errorHandeler(err);
     })
+    
+}
+
+function tvPopularity(req,res){
+    let url = `https://api.themoviedb.org/3/tv/top_rated?api_key=${Api_Key}&language=en-US&page=1`;
+    axios.get(url)
+    .then((result)=>{
+        //console.log(result.data.results);
+        let dataTV = result.data.results.map((TV)=>{
+            return new TvCon(TV.id,TV.name,TV.first_air_date,TV.popularity,TV.overview)
+        })
+            res.json(dataTV);
+         })
     .catch((err)=>{
         errorHandeler(err);
     })
@@ -75,25 +98,16 @@ function movieSearch(req,res){
 }
 
 function movieLanguage(req,res){
-    let movieLang = req.query.original_language;
-    let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&query=${movieLang}&The&page=2`
+    let movieLanguage = req.query.original_language;
+    let url = `https://api.themoviedb.org/3/trending/all/week?api_key=${Api_Key}&query=${movieLanguage}`
     axios.get(url)
     .then((result)=>{
-        res.json(result.data.results);
-    })
-  .catch((err)=>{
-      errorHandeler(err);
-    })
-    
-}
-
-function movieType(req,res){
-    let movieReleaseDate = req.query.release_date;
-    let url = `https://api.themoviedb.org/3/search/movie?api_key=${Api_Key}&query=${movieReleaseDate}&The&page=2`
-    axios.get(url)
-    .then((result)=>{
-        res.json(result.data.results);
-    })
+        //console.log(result.data.results); 
+        let dataMovie = result.data.results.map((movie)=>{
+            return new LanguageCon(movie.title,movie.original_language,movie.overview)
+        })
+            res.json(dataMovie);
+        })
     .catch((err)=>{
       errorHandeler(err);
     })
@@ -103,7 +117,6 @@ function movieType(req,res){
 
 
 function sqlMovies(req,res){
-    //console.log("hi");
     let {movieName,overView}= req.body;
     let values = [movieName,overView];
     let sql = `INSERT INTO movies (movieName, overView)
@@ -111,7 +124,7 @@ function sqlMovies(req,res){
     client.query(sql,values).then(
         res.status(201).send("Data recived to the server")   
         ).catch((err)=>{errorHandeler(err)});
-    }
+}
     
 function moviesData(req,res){
     let sql = `SELECT * FROM movies; `
@@ -158,6 +171,15 @@ function getData(req,res){
     
 }
 
+// constructors
+function TvCon(id,name,first_air_date,popularity,overview){
+    this.id=id;
+    this.name=name;
+    this.first_air_date=first_air_date;
+    this.popularity=popularity;
+    this.overview=overview;
+}
+
 function ConMovie(id,title,release_date,poster_path,overview){
     this.id=id;
     this.title=title;
@@ -166,11 +188,18 @@ function ConMovie(id,title,release_date,poster_path,overview){
     this.overview=overview;
 }
 
+function LanguageCon(title,original_language,overview){
+    this.title=title;
+    this.original_language=original_language;
+    this.overview=overview;
+  }
+
 function JasonCon(title,poster_path,overview){
   this.title=title;
   this.poster_path=poster_path;
   this.overview=overview;
 }
+
 // error handeler 
 app.use((req,res)=>{
     res.status(404).send("sorry, somthing went wrong !");
