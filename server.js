@@ -14,7 +14,7 @@ app.use(bodyParser.json())
 const jasonData = require('./Movie Data/data.json');
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
-const port = process.env.port;
+const port = process.env.PORT;
 //node-postgres
 let url = process.env.url;
 const { Client } = require('pg')
