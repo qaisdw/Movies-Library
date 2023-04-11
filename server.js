@@ -2,12 +2,18 @@
 
 // to kill a port => sudo kill -9 $(sudo lsof -t -i:portnumber)
 const express = require('express');
-var cors = require('cors')
+const cors = require("cors")
+const corsOptions ={ 
+    origin:'*',
+    credentials:true,
+    optionSuccessStatus:200,
+    }
 require('dotenv').config()
 const axios = require("axios");
 const bodyParser = require('body-parser')
 const app = express()
-app.use(cors())
+app.use(cors(corsOptions))
+// app.use(cors())
 const Api_Key=process.env.api_key;
 // parse application/json
 app.use(bodyParser.json())
