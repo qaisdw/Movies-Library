@@ -125,7 +125,7 @@ function sqlMovies(req,res){
     VALUES ($1,$2,$3,$4) RETURNING *; `
     client.query(sql,values).then(
         res.status(201).send("Data recived to the server")   
-        ).catch((err)=>{errorHandeler(err)});
+        ).catch();
 }
     
 function moviesData(req,res){
