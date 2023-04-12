@@ -119,10 +119,10 @@ function movieLanguage(req,res){
 
 
 function sqlMovies(req,res){
-    let {movieName,overView}= req.body;
-    let values = [movieName,overView];
-    let sql = `INSERT INTO movies (movieName, overView)
-    VALUES ($1,$2) RETURNING *; `
+    let {movieName,comment,movieImg,overView}= req.body;
+    let values = [movieName,comment,movieImg,overView];
+    let sql = `INSERT INTO movies (movieName,comment,movieImg,overView)
+    VALUES ($1,$2,$3,$4) RETURNING *; `
     client.query(sql,values).then(
         res.status(201).send("Data recived to the server")   
         ).catch((err)=>{errorHandeler(err)});
@@ -138,9 +138,9 @@ function moviesData(req,res){
     
 function updateHandler(req,res){
     let ID = req.params.id;
-    let {overView}=req.body
-    let values = [overView,ID];
-    let sql = `UPDATE movies SET overView = $1 WHERE ID = $2 ; `;
+    let {comment}=req.body
+    let values = [comment,ID];
+    let sql = `UPDATE movies SET comment = $1 WHERE ID = $2 ; `;
     client.query(sql,values).then((result)=>{
         res.json("DONE");
     }
